@@ -1,0 +1,20 @@
+YT_Transcriber uses the following third-party libraries:
+
+1. PyQt6
+   License: GNU General Public License v3
+   https://www.qt.io/licensing/
+
+2. yt-dlp
+   License: Unlicense (public domain)
+   https://github.com/yt-dlp/yt-dlp/blob/master/LICENSE
+
+3. faster-whisper
+   License: MIT
+   https://github.com/guillaumekln/faster-whisper/blob/master/LICENSE
+
+4. FFmpeg
+   License: LGPL v2.1+ / GPL v2+
+   https://www.ffmpeg.org/legal.html
+
+This application is licensed under the GNU General Public License v3.0.
+Copyright (C) 2025 Marco Pastorello

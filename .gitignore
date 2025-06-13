@@ -1,0 +1,11 @@
+# virtual environments
+/venv
+
+# folders
+/ffmpeg
+/models
+/temp
+/built
+
+# other files
+py_to_app.txt
