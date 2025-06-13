@@ -31,7 +31,7 @@ The application is completely self-contained and works offline after the initial
 1. **Clone the repository or download the files**
 
 ```
-git clone https://github.com/username/youtube-audio-extractor.git
+git clone https://github.com/markpast92/YT_Transcriber.git
 cd youtube-audio-extractor
 ```
 2. **Create a virtual environment (recommended)**
