@@ -1,6 +1,6 @@
 # YT_Transcriber
 
-![Screenshot dell'applicazione](assets/example_1.jpeg)
+![Screenshot dell'applicazione](assets/Example_1.jpeg)
 
 ## 📋 Description
 
