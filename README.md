@@ -1,5 +1,7 @@
 # YT_Transcriber
 
+![Screenshot dell'applicazione](assets/example_1.jpeg)
+
 ## 📋 Description
 
 YT_Transcriber is a desktop application that allows you to:
