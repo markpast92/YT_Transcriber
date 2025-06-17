@@ -238,14 +238,14 @@ class YouTubeAudioExtractor(QMainWindow):
             def progress_hook(d):
                 if d['status'] == 'downloading':
                     if 'total_bytes' in d and d['total_bytes'] > 0:
-                        percent = d['downloaded_bytes'] / d['total_bytes'] * 100
+                        percent = (d['downloaded_bytes'] / d['total_bytes']) * 50
                         self.signals.progress.emit(percent)
-                        self.signals.status.emit(f"Downloading: {percent:.1f}%")
+                        self.signals.status.emit(f"Downloading: {percent*2:.1f}%")
                     elif 'downloaded_bytes' in d:
                         self.signals.status.emit(f"Downloading: {d['downloaded_bytes'] / 1024 / 1024:.1f} MB")
                 elif d['status'] == 'finished':
                     self.signals.status.emit("Download completed, extracting audio...")
-                    self.signals.progress.emit(100)
+                    self.signals.progress.emit(50)
             
             # Get FFmpeg path or download if not available
             ffmpeg_path = self.get_or_download_ffmpeg()
@@ -428,14 +428,17 @@ class YouTubeAudioExtractor(QMainWindow):
     def transcribe_audio(self, audio_file):
         try:
             self.signals.status.emit("Importing transcription library...")
+            self.signals.progress.emit(60)
             
             # Import here to avoid loading at app startup
             from faster_whisper import WhisperModel
             
+            # Ottieni il modello selezionato dall'utente
             model_size = self.model_selector.text().strip() or "small"
             self.signals.status.emit(f"Loading transcription model '{model_size}'...")
+            self.signals.progress.emit(70)
             
-            # Load model from app models folder
+            # Carica il modello
             model = WhisperModel(
                 model_size, 
                 device="cpu", 
@@ -443,17 +446,39 @@ class YouTubeAudioExtractor(QMainWindow):
                 download_root=str(self.models_dir)
             )
             
-            self.signals.status.emit("Transcription in progress... (may take several minutes)")
+            self.signals.status.emit("Starting transcription... (may take several minutes)")
+            self.signals.progress.emit(75)
             
-            # Execute transcription
-            segments, info = model.transcribe(audio_file, beam_size=5)
+            # Esegui la trascrizione
+            segments_generator, info = model.transcribe(
+                audio_file, 
+                beam_size=5,
+                word_timestamps=False
+            )
             
-            # Join segments into complete text
+            # Raccogli i segmenti e monitora il progresso
             transcript = ""
-            for segment in segments:
-                transcript += f"{segment.text} "
+            segments = []
+            segment_count = 0
             
-            self.signals.status.emit("Transcription completed")
+            # Simuliamo il progresso durante la trascrizione
+            for segment in segments_generator:
+                segments.append(segment)
+                segment_count += 1
+                transcript += f"{segment.text} "
+                
+                # Aggiorna lo stato e il progresso ogni 5 segmenti
+                if segment_count % 5 == 0:
+                    progress_value = 75 + min(segment_count, 100) / 5
+                    if progress_value > 95:
+                        progress_value = 95
+                    self.signals.progress.emit(progress_value)
+                    self.signals.status.emit(f"Transcribing: {segment_count} segments processed")
+            
+            # Segnala il completamento
+            self.signals.progress.emit(95)
+            self.signals.status.emit("Transcription completed successfully")
+            
             return transcript.strip()
             
         except ImportError:
@@ -466,7 +491,7 @@ class YouTubeAudioExtractor(QMainWindow):
                 return self.transcribe_audio(audio_file)
             except Exception as e:
                 return f"Error installing transcription library: {str(e)}"
-            
+                
         except Exception as e:
             error_msg = f"Error during transcription: {str(e)}"
             self.signals.status.emit(error_msg)
@@ -481,6 +506,9 @@ class YouTubeAudioExtractor(QMainWindow):
     def process_finished(self, file_path, transcript):
         self.extract_button.setEnabled(True)
         self.update_status(f"Audio extracted successfully: {file_path}")
+
+        # Completa la barra di progresso al 100%
+        self.progress_bar.setValue(100)
         
         # Save current file
         self.current_audio_file = file_path
